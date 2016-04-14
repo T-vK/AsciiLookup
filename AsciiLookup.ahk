@@ -1,47 +1,45 @@
 ﻿#SingleInstance, force
 
 Gui, Add, Text, , Ascii
-Gui, Add, Edit, vAscii gAscii
+Gui, Add, Edit, vAscii gCtrlEvent
 
 Gui, Add, Text, , Dec
-Gui, Add, Edit, vDec gDec
+Gui, Add, Edit, vDec gCtrlEvent
 
 Gui, Add, Text, , Hex
-Gui, Add, Edit, vHex gHex
+Gui, Add, Edit, vHex gCtrlEvent
 
 Gui, Show,, AsciiLookup
 
-GuiClose() {
+GuiClose(hwnd:=0) {
     ExitApp
 }
 
-Ascii() {
-    GuiControlGet, focused, FocusV
-    If (focused != "Ascii")
-        Return
-    GuiControlGet, Ascii
-    char := SubStr(Ascii, 1, 1)
-    GuiControl,, Ascii, % char
-    dec := Asc(char)
-    GuiControl,, Dec, % dec
-    GuiControl,, Hex, % DecToHex(dec)
+CtrlEvent(CtrlHwnd:=0, GuiEvent:="", EventInfo:="", ErrLvl:="") {
+    GuiControlGet, controlName, Name, %CtrlHwnd%
+    If IsGuiControlFocused(controlName) {
+        If (controlName = "Ascii") {
+            GuiControlGet, Ascii
+            char := SubStr(Ascii, 1, 1)
+            GuiControl,, Ascii, % char
+            dec := Asc(char)
+            GuiControl,, Dec, % dec
+            GuiControl,, Hex, % DecToHex(dec)
+        } Else If (controlName = "Dec") {
+            GuiControlGet, Dec
+            GuiControl,, Ascii, % Chr(Dec)
+            GuiControl,, Hex, % DecToHex(Dec)
+        } Else If (controlName = "Hex") {
+            GuiControlGet, Hex
+            dec := HexToDec(Hex)
+            GuiControl,, Ascii, % Chr(dec)
+            GuiControl,, Dec, % dec
+        }
+    }
 }
-Dec() {
+IsGuiControlFocused(controlName) {
     GuiControlGet, focused, FocusV
-    If (focused != "Dec")
-        Return
-    GuiControlGet, Dec
-    GuiControl,, Ascii, % Chr(Dec)
-    GuiControl,, Hex, % DecToHex(Dec)
-}
-Hex() {
-    GuiControlGet, focused, FocusV
-    If (focused != "Hex")
-        Return
-    GuiControlGet, Hex
-    dec := HexToDec(Hex)
-    GuiControl,, Ascii, % Chr(dec)
-    GuiControl,, Dec, % dec
+    Return focused = controlName
 }
 
 HexToDec(str){
